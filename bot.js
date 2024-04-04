@@ -52,18 +52,17 @@ function removeUser(userId) {
 }
 
 async function serverQuery(ip, port) {
-    return await GameDig.query({
-        type: "dayz",
-        host: ip,
-        port: port
-    })
-    .then((state) => {
-        return state
-    })
-    .catch((error) => {
+    try {
+        const state = await GameDig.query({
+            type: "dayz",
+            host: ip,
+            port: port
+        });
+        return state;
+    } catch (error) {
         console.log(`Server is offline, error: ${error}`);
-        return null
-    });
+        return null;
+    }
 }
 
 bot.command("notify", async (ctx) => {
@@ -117,7 +116,7 @@ setInterval(async () => {
         if(parseInt(serverHour) > parseInt(notifyHour) || (parseInt(serverHour) == parseInt(notifyHour) && parseInt(serverMinute) >= parseInt(notifyMinute))) {
             console.log(`Notifying user ${userId}`);
             const formattedTimeDiff = `${parseInt(serverHour) - parseInt(notifyHour)}:${(60 + parseInt(serverMinute) - parseInt(notifyMinute))%60}`;
-            bot.telegram.sendMessage(parseInt(userId), `Server has reached ${notifyHour}:${notifyMinute}.\nServer time: ${serverHour}:${serverMinute}\nBot was late by: ${formattedTimeDiff}`);
+            bot.telegram.sendMessage(parseInt(userId), `Server has reached ${notifyHour}:${notifyMinute}.\nServer time: ${serverHour}:${(serverMinute.length === 1 ? '0' : '') + serverMinute}\nBot was late by: ${formattedTimeDiff}`);
 
             console.log(`Removing user ${userId}`);
             removeUser(userId);
